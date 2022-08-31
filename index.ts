@@ -45,38 +45,6 @@ async function main(pubkeystring : string ){
 
 }
 
-
-function async getTransactionHistory(
-    provider: AnchorProvider,
-    pubKey: PublicKey,
-    mints: Mints,
-    cluster: MarginCluster,
-    pageSize = 100
-  ): Promise<AccountTransaction[]> {
-    const config = await MarginClient.getConfig(cluster)
-    const signatures = await provider.connection.getSignaturesForAddress(pubKey, undefined, "confirmed")
-    const jetTransactions: ParsedTransactionWithMeta[] = []
-    let page = 0
-    let processed = 0
-    while (processed < signatures.length) {
-      const paginatedSignatures = signatures2.slice(page * pageSize, (page + 1) * pageSize)
-      const transactions = await provider.connection.getParsedTransactions(
-        paginatedSignatures.map(s => s.signature),
-        "confirmed"
-      )
-      const filteredTxs = MarginClient.filterTransactions(transactions, config)
-      jetTransactions.push(...filteredTxs)
-      page++
-      processed += paginatedSignatures.length
-    }
-
-    const parsedTransactions = jetTransactions
-      .map((t, idx) => MarginClient.getTransactionData(t, mints, config, idx))
-      .filter(tx => !!tx) as AccountTransaction[]
-    return parsedTransactions.sort((a, b) => a.sigIndex - b.sigIndex)
-  }
-}
-
 main('8oPT9UsUkW7zHqZzGnx1BuSKd4JHCEhWEXXbJkbknouh')
 
 // console.log("look ma, no hands")
